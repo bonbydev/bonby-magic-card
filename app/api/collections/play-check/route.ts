@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
   try {
     await connectDB();
 
-    const { collectionId, recordPlay } = await request.json();
+    const { collectionId, recordPlay, flippedCard } = await request.json();
 
     if (!collectionId) {
       return NextResponse.json(
@@ -88,9 +88,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Basic validation for flippedCard when recording a play
+    if (
+      recordPlay &&
+      (typeof flippedCard !== "number" || !Number.isFinite(flippedCard))
+    ) {
+      return NextResponse.json(
+        { error: "Flipped card value is required when recording a play" },
+        { status: 400 },
+      );
+    }
+
     const play = new AnonymousPlay({
       collectionId,
       ipAddress: clientIp,
+      flippedCard,
     });
 
     await play.save();

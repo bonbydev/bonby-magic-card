@@ -33,6 +33,7 @@ export function AnonymousGame({
         body: JSON.stringify({
           collectionId: collection._id,
           recordPlay: true,
+          flippedCard: cardNumber,
         }),
       });
     } catch (error) {

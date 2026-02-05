@@ -1,9 +1,11 @@
-import mongoose, { Schema, Document } from 'mongoose'
+import mongoose, { Schema, Document } from "mongoose";
 
 export interface IAnonymousPlay extends Document {
-  collectionId: string
-  ipAddress: string
-  playedAt: Date
+  collectionId: string;
+  ipAddress: string;
+  // The card value the player flipped
+  flippedCard: number;
+  playedAt: Date;
 }
 
 const AnonymousPlaySchema = new Schema<IAnonymousPlay>(
@@ -18,6 +20,10 @@ const AnonymousPlaySchema = new Schema<IAnonymousPlay>(
       required: true,
       index: true,
     },
+    flippedCard: {
+      type: Number,
+      required: true,
+    },
     playedAt: {
       type: Date,
       default: Date.now,
@@ -25,15 +31,17 @@ const AnonymousPlaySchema = new Schema<IAnonymousPlay>(
   },
   {
     timestamps: false,
-  }
-)
+  },
+);
 
 // Compound index to ensure one play per IP per collection
-AnonymousPlaySchema.index({ collectionId: 1, ipAddress: 1 }, { unique: true })
+AnonymousPlaySchema.index({ collectionId: 1, ipAddress: 1 }, { unique: true });
 
 // Auto-delete records older than 30 days
-AnonymousPlaySchema.index({ playedAt: 1 }, { expireAfterSeconds: 2592000 })
+AnonymousPlaySchema.index({ playedAt: 1 }, { expireAfterSeconds: 2592000 });
 
-const AnonymousPlay = mongoose.models.AnonymousPlay || mongoose.model<IAnonymousPlay>('AnonymousPlay', AnonymousPlaySchema)
+const AnonymousPlay =
+  mongoose.models.AnonymousPlay ||
+  mongoose.model<IAnonymousPlay>("AnonymousPlay", AnonymousPlaySchema);
 
-export default AnonymousPlay
+export default AnonymousPlay;

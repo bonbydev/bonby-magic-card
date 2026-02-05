@@ -215,6 +215,27 @@ export function CollectionList({
                     Created:{" "}
                     {new Date(collection.createdAt).toLocaleDateString()}
                   </p>
+                  <p className="text-muted-foreground mt-1 text-xs">
+                    Played by {collection.playCount ?? 0}{" "}
+                    {collection.playCount === 1 ? "player" : "players"}
+                  </p>
+                  {collection.recentPlays &&
+                    collection.recentPlays.length > 0 && (
+                      <details className="mt-1 text-xs">
+                        <summary className="text-foreground/80 hover:text-foreground cursor-pointer select-none">
+                          View play history
+                        </summary>
+                        <ul className="text-muted-foreground mt-1 max-h-24 space-y-0.5 overflow-y-auto pr-1">
+                          {collection.recentPlays.map((play, idx) => (
+                            <li key={idx}>
+                              {new Date(play.playedAt).toLocaleString()} &mdash;{" "}
+                              {play.username || "Guest"} &mdash; flipped{" "}
+                              {formatCardValue(play.flippedCard)}
+                            </li>
+                          ))}
+                        </ul>
+                      </details>
+                    )}
                 </div>
                 <div className="flex shrink-0 gap-2">
                   <button

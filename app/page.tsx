@@ -208,7 +208,21 @@ export default function HomePage() {
               <CardGame
                 playerName={currentUser}
                 collectionCards={currentCollection.cards}
-                onCardFlip={(cardNumber) => {
+                onCardFlip={async (cardNumber) => {
+                  // Record this logged-in play for statistics
+                  try {
+                    await fetch("/api/collections/logged-play", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        collectionId: currentCollection._id,
+                        flippedCard: cardNumber,
+                      }),
+                    });
+                  } catch (err) {
+                    console.error("Failed to record logged-in play", err);
+                  }
+
                   setFlippedCard(cardNumber);
                   setScreen("gameover");
                 }}
@@ -223,7 +237,6 @@ export default function HomePage() {
               <GameOver
                 playerName={currentUser}
                 flippedCard={flippedCard}
-                collectionName={currentCollection.name}
                 onRestart={() => {
                   setFlippedCard(null);
                   setScreen("game");
