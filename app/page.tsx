@@ -1,4 +1,4 @@
-"use client";
+ "use client";
 
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
@@ -108,6 +108,13 @@ export default function HomePage() {
     setScreen("game");
   };
 
+  const goHome = () => {
+    setShowSettings(false);
+    setFlippedCard(null);
+    setCurrentCollection(null);
+    setScreen("home");
+  };
+
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-x-hidden px-4 py-6 sm:px-6 sm:py-8 lg:py-10">
       {/* Background image (optimized with next/image) */}
@@ -125,6 +132,45 @@ export default function HomePage() {
       {/* Overlay for readability */}
       <div className="fixed inset-0 -z-10 bg-black/55 transition-opacity duration-500" />
 
+      {/* Top bar with logo and settings */}
+      <div className="absolute top-4 right-4 left-4 z-20 flex items-center justify-between">
+        <button
+          type="button"
+          onClick={goHome}
+          className="flex items-center gap-2 focus:outline-none"
+          aria-label="Go to home"
+        >
+          <Image
+            src="/images/logo.webp"
+            alt="Bonby Magic Card"
+            width={60}
+            height={60}
+            className="rounded-lg shadow-md cursor-pointer"
+          />
+        </button>
+
+        {/* Settings */}
+        <div className="relative" ref={settingsRef}>
+          <button
+            type="button"
+            onClick={() => setShowSettings(!showSettings)}
+            className="text-foreground focus:ring-primary/50 rounded-full bg-white/10 p-2.5 transition-all duration-200 hover:scale-105 hover:bg-white/20 focus:ring-2 focus:outline-none"
+            aria-label="Settings"
+          >
+            <FiSettings className="h-5 w-5 text-white" />
+          </button>
+
+          {showSettings && (
+            <div className="animate-scale-in absolute right-0 mt-2 origin-top-right">
+              <ThemeSelector
+                currentTheme={currentTheme}
+                onThemeChange={handleThemeChange}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+
       {authLoading ? (
         <div className="z-10 flex flex-col items-center justify-center gap-4">
           <div className="h-10 w-10 animate-spin rounded-full border-4 border-white/30 border-t-white" />
@@ -134,28 +180,6 @@ export default function HomePage() {
         </div>
       ) : (
         <>
-          {/* Settings */}
-          <button
-            type="button"
-            onClick={() => setShowSettings(!showSettings)}
-            className="text-foreground focus:ring-primary/50 absolute top-14 right-4 z-20 rounded-full bg-white/10 p-2.5 transition-all duration-200 hover:scale-105 hover:bg-white/20 focus:ring-2 focus:outline-none lg:top-4"
-            aria-label="Settings"
-          >
-            <FiSettings className="h-5 w-5" />
-          </button>
-
-          {showSettings && (
-            <div
-              ref={settingsRef}
-              className="animate-scale-in absolute top-16 right-4 z-20 origin-top-right"
-            >
-              <ThemeSelector
-                currentTheme={currentTheme}
-                onThemeChange={handleThemeChange}
-              />
-            </div>
-          )}
-
           {/* Screen Routes */}
           {screen === "home" && (
             <HomeScreen
