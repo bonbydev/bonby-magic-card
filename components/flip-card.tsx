@@ -1,6 +1,8 @@
 "use client";
 
 import { useRef, useState } from "react";
+
+import { formatCardValue } from "@/utils";
 import { getCardBackImage } from "@/lib/theme";
 
 interface FlipCardProps {
@@ -68,11 +70,8 @@ export function FlipCard({
         {/* Card face (visible when flipped) */}
         <div className="bg-card/95 absolute inset-0 flex rotate-y-180 items-center justify-center rounded-xl border-2 border-white/20 shadow-xl backdrop-blur-sm backface-hidden">
           <div className="px-2 text-center">
-            <p className="text-muted-foreground mb-1 text-xs font-medium sm:text-sm">
-              Card {number}
-            </p>
-            <p className="from-primary to-accent bg-linear-to-br bg-clip-text text-4xl font-bold text-transparent sm:text-5xl">
-              {value}
+            <p className="from-primary to-accent bg-linear-to-br bg-clip-text text-2xl font-bold text-transparent">
+              {formatCardValue(value)}
             </p>
           </div>
         </div>

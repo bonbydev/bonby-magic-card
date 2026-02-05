@@ -13,7 +13,9 @@ import {
   FiShare2,
   FiCheck,
 } from "react-icons/fi";
+
 import { ConfirmModal } from "@/components/confirm-modal";
+import { formatCardValue } from "@/utils";
 
 interface CollectionListProps {
   username: string;
@@ -203,9 +205,9 @@ export function CollectionList({
                     {collection.cards.map((card, idx) => (
                       <span
                         key={idx}
-                        className="bg-primary/20 text-primary inline-flex h-8 w-8 items-center justify-center rounded-lg text-sm font-medium"
+                        className="bg-primary/20 text-primary inline-flex h-8 items-center justify-center rounded-lg px-2 text-sm font-medium whitespace-nowrap"
                       >
-                        {card}
+                        {formatCardValue(card)}
                       </span>
                     ))}
                   </div>

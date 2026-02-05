@@ -45,7 +45,6 @@ export function AnonymousGame({
       <GameOver
         playerName="Guest"
         flippedCard={flippedCard}
-        collectionName={collection.name}
         onRestart={() => {
           setFlippedCard(null);
         }}
@@ -56,14 +55,14 @@ export function AnonymousGame({
 
   return (
     <div className="flex w-full max-w-4xl flex-col items-center justify-center space-y-4 px-4 sm:px-0">
-      <button
+      {/* <button
         type="button"
         onClick={onBack}
         className="text-foreground flex items-center gap-2 self-start px-4 py-2 transition-colors hover:text-white/90"
       >
         <FiArrowLeft className="h-5 w-5" />
         Back
-      </button>
+      </button> */}
 
       <CardGame
         playerName="Guest"

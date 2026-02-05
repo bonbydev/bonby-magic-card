@@ -20,6 +20,10 @@ export function CollectionBuilder({
   const [cards, setCards] = useState<number[]>([0, 0, 0, 0, 0]);
   const [loading, setLoading] = useState(false);
 
+  const formatNumberWithDots = (value: number) => {
+    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  };
+
   const handleCardChange = (index: number, value: string) => {
     const num = parseInt(value) || 0;
     const newCards = [...cards];
@@ -122,21 +126,33 @@ export function CollectionBuilder({
                   <p className="text-muted-foreground mb-1 flex-1 text-sm">
                     Card {index + 1}
                   </p>
-                  <input
-                    type="text"
-                    value={value}
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    onChange={(e) =>
-                      handleCardChange(
-                        index,
-                        e.target.value.replace(/[^0-9]/g, ""),
-                      )
-                    }
-                    placeholder={`${index + 1}`}
-                    className="bg-background/80 border-border text-foreground placeholder-muted-foreground focus:ring-primary w-full flex-4 rounded-xl border px-4 py-3 text-left transition-all duration-200 focus:ring-2 focus:outline-none"
-                    disabled={loading}
-                  />
+                  <div className="flex flex-4 items-center gap-2">
+                    <input
+                      type="text"
+                      value={formatNumberWithDots(value)}
+                      inputMode="numeric"
+                      pattern="[0-9.]*"
+                      onChange={(e) =>
+                        handleCardChange(
+                          index,
+                          e.target.value.replace(/[^0-9]/g, ""),
+                        )
+                      }
+                      placeholder={`${index + 1}`}
+                      className="bg-background/80 border-border text-foreground placeholder-muted-foreground focus:ring-primary w-full flex-1 rounded-xl border px-4 py-3 text-left transition-all duration-200 focus:ring-2 focus:outline-none"
+                      disabled={loading}
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleCardChange(index, String((value || 0) * 1000))
+                      }
+                      className="bg-primary/80 text-primary-foreground hover:bg-primary rounded-xl px-3 py-2 text-xs font-semibold whitespace-nowrap transition-colors disabled:opacity-50"
+                      disabled={loading}
+                    >
+                      x1000
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
