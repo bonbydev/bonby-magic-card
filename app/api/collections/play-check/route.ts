@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Collection from "@/lib/models/Collection";
 import AnonymousPlay from "@/lib/models/AnonymousPlay";
+import UserPlay from "@/lib/models/UserPlay";
+import { getSession, parseSession } from "@/lib/session";
 import mongoose from "mongoose";
 
 function getClientIp(request: NextRequest): string {
@@ -16,7 +18,8 @@ export async function POST(request: NextRequest) {
   try {
     await connectDB();
 
-    const { collectionId, recordPlay, flippedCard } = await request.json();
+    const { collectionId, recordPlay, flippedCard, clientId } =
+      await request.json();
 
     if (!collectionId) {
       return NextResponse.json(
@@ -44,15 +47,34 @@ export async function POST(request: NextRequest) {
 
     const clientIp = getClientIp(request);
 
-    // Check if this IP already played this collection
-    const existingPlay = await AnonymousPlay.findOne({
-      collectionId,
-      ipAddress: clientIp,
-    });
+    // Check if a logged-in user is present
+    const session = await getSession();
+    const parsedSession = session ? parseSession(session) : null;
+    const username = parsedSession?.username ?? null;
+
+    // Check if this anonymous client or (if logged in) this username already played this collection
+    const existingAnonPlay =
+      clientId != null
+        ? await AnonymousPlay.findOne({
+            collectionId,
+            clientId,
+          })
+        : await AnonymousPlay.findOne({
+            collectionId,
+            ipAddress: clientIp,
+          });
+
+    const existingUserPlay =
+      username != null
+        ? await UserPlay.findOne({
+            collectionId,
+            username,
+          })
+        : null;
 
     // If this is just a "check" request (initial page load)
     if (!recordPlay) {
-      if (existingPlay) {
+      if (existingAnonPlay || existingUserPlay) {
         return NextResponse.json(
           {
             canPlay: false,
@@ -77,7 +99,7 @@ export async function POST(request: NextRequest) {
     }
 
     // If this is a "record play" request (after user actually flips a card)
-    if (existingPlay) {
+    if (existingAnonPlay || existingUserPlay) {
       // Already recorded; just acknowledge
       return NextResponse.json(
         {
@@ -99,13 +121,33 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const play = new AnonymousPlay({
-      collectionId,
-      ipAddress: clientIp,
-      flippedCard,
-    });
+    // Decide where to record the play:
+    // - Logged-in user: record in UserPlay by username
+    // - Guest: record in AnonymousPlay by clientId (or IP as fallback)
+    if (username) {
+      await UserPlay.updateOne(
+        {
+          collectionId,
+          username,
+        },
+        {
+          $set: {
+            flippedCard,
+            playedAt: new Date(),
+          },
+        },
+        { upsert: true },
+      );
+    } else {
+      const play = new AnonymousPlay({
+        collectionId,
+        ipAddress: clientIp,
+        clientId: clientId ?? clientIp,
+        flippedCard,
+      });
 
-    await play.save();
+      await play.save();
+    }
 
     return NextResponse.json(
       {

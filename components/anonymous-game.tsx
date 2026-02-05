@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { CardGame } from "@/components/card-game";
 import { GameOver } from "@/components/game-over";
 import { FiArrowLeft } from "react-icons/fi";
@@ -21,6 +21,25 @@ export function AnonymousGame({
   theme = "ocean",
 }: AnonymousGameProps) {
   const [flippedCard, setFlippedCard] = useState<number | null>(null);
+  const clientIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    // Ensure we have a browser-scoped client ID, even if the play page didn't initialize it
+    if (typeof window === "undefined") return;
+
+    const existingClientId = localStorage.getItem("cardGameClientId");
+    if (existingClientId) {
+      clientIdRef.current = existingClientId;
+      return;
+    }
+
+    const newClientId =
+      typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? (crypto as any).randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    localStorage.setItem("cardGameClientId", newClientId);
+    clientIdRef.current = newClientId;
+  }, []);
 
   const handleCardFlip = async (cardNumber: number) => {
     setFlippedCard(cardNumber);
@@ -34,6 +53,7 @@ export function AnonymousGame({
           collectionId: collection._id,
           recordPlay: true,
           flippedCard: cardNumber,
+          clientId: clientIdRef.current,
         }),
       });
     } catch (error) {

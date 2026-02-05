@@ -3,6 +3,8 @@ import mongoose, { Schema, Document } from "mongoose";
 export interface IAnonymousPlay extends Document {
   collectionId: string;
   ipAddress: string;
+  // Browser-scoped anonymous identifier, stored in localStorage
+  clientId: string;
   // The card value the player flipped
   flippedCard: number;
   playedAt: Date;
@@ -16,6 +18,11 @@ const AnonymousPlaySchema = new Schema<IAnonymousPlay>(
       index: true,
     },
     ipAddress: {
+      type: String,
+      required: true,
+      index: true,
+    },
+    clientId: {
       type: String,
       required: true,
       index: true,
@@ -34,8 +41,11 @@ const AnonymousPlaySchema = new Schema<IAnonymousPlay>(
   },
 );
 
-// Compound index to ensure one play per IP per collection
-AnonymousPlaySchema.index({ collectionId: 1, ipAddress: 1 }, { unique: true });
+// Compound index to ensure one play per client per collection
+AnonymousPlaySchema.index(
+  { collectionId: 1, clientId: 1 },
+  { unique: true },
+);
 
 // Auto-delete records older than 30 days
 AnonymousPlaySchema.index({ playedAt: 1 }, { expireAfterSeconds: 2592000 });

@@ -25,6 +25,7 @@ export default function PlayPage({ params }: PlayPageProps) {
   const [error, setError] = useState<string | null>(null);
   const [currentTheme, setCurrentTheme] = useState<string>("ocean");
   const hasCheckedPlay = useRef(false);
+  const clientIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     // Load saved theme or select random theme
@@ -43,6 +44,19 @@ export default function PlayPage({ params }: PlayPageProps) {
 
     // Apply theme to document
     document.documentElement.className = `theme-${currentTheme}`;
+
+    // Initialize anonymous client ID for this browser (used instead of IP)
+    const existingClientId = localStorage.getItem("cardGameClientId");
+    if (existingClientId) {
+      clientIdRef.current = existingClientId;
+    } else {
+      const newClientId =
+        (typeof crypto !== "undefined" && "randomUUID" in crypto
+          ? (crypto as any).randomUUID()
+          : `${Date.now()}-${Math.random().toString(36).slice(2)}`);
+      localStorage.setItem("cardGameClientId", newClientId);
+      clientIdRef.current = newClientId;
+    }
 
     const unwrapParams = async () => {
       const resolvedParams = await params;
@@ -67,7 +81,11 @@ export default function PlayPage({ params }: PlayPageProps) {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           // Only *check* if the user can play; do not record the play yet
-          body: JSON.stringify({ collectionId: id, recordPlay: false }),
+          body: JSON.stringify({
+            collectionId: id,
+            recordPlay: false,
+            clientId: clientIdRef.current,
+          }),
         });
 
         const data = await response.json();
