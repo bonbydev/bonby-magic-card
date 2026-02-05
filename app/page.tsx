@@ -1,6 +1,7 @@
- "use client";
+"use client";
 
 import Image from "next/image";
+import Script from "next/script";
 import { useState, useEffect, useRef } from "react";
 import { CardGame } from "@/components/card-game";
 import { GameOver } from "@/components/game-over";
@@ -24,6 +25,10 @@ type AppScreen =
   | "gameover";
 
 export default function HomePage() {
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    "https://bonby-magic-card.vercel.app";
+
   const [screen, setScreen] = useState<AppScreen>("home");
   const [currentUser, setCurrentUser] = useState<string | null>(null);
   const [currentCollection, setCurrentCollection] =
@@ -115,8 +120,25 @@ export default function HomePage() {
     setScreen("home");
   };
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: "Bonby Magic Card Game",
+    url: siteUrl,
+    description:
+      "Bonby Magic Card is an online flip-card game where you build collections, play daily, and unlock surprise rewards.",
+    applicationCategory: "Game",
+    operatingSystem: "Web",
+  };
+
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-x-hidden px-4 py-6 sm:px-6 sm:py-8 lg:py-10">
+      <Script
+        id="bonby-structured-data"
+        type="application/ld+json"
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Background image (optimized with next/image) */}
       <div className="fixed inset-0 -z-20">
         <Image
