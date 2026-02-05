@@ -117,7 +117,13 @@ export default function HomePage() {
     setShowSettings(false);
     setFlippedCard(null);
     setCurrentCollection(null);
-    setScreen("home");
+    // If a user is logged in, treat the logo as a shortcut
+    // back to their collections instead of the login/signup screen.
+    if (currentUser) {
+      setScreen("collections");
+    } else {
+      setScreen("home");
+    }
   };
 
   const jsonLd = {
